@@ -1,10 +1,27 @@
+
+CREATE DATABASE IF NOT EXISTS olist;
+USE olist;
+
+
+-- ============================================
+-- 1. GEOLOCATION
+-- ============================================
+
 CREATE TABLE geolocation (
-    geolocation_zip_code_prefix INT PRIMARY KEY,
+    geolocation_id INT AUTO_INCREMENT PRIMARY KEY,
+    geolocation_zip_code_prefix INT NOT NULL,
     geolocation_lat DECIMAL(10,6),
     geolocation_lng DECIMAL(10,6),
     geolocation_city VARCHAR(100),
-    geolocation_state CHAR(2)
+    geolocation_state CHAR(2),
+
+    INDEX idx_geolocation_zip (geolocation_zip_code_prefix)
 );
+
+
+-- ============================================
+-- 2. CUSTOMERS
+-- ============================================
 
 CREATE TABLE customers (
     customer_id VARCHAR(32) PRIMARY KEY,
@@ -12,16 +29,28 @@ CREATE TABLE customers (
     customer_zip_code_prefix INT,
     customer_city VARCHAR(100),
     customer_state CHAR(2),
-    FOREIGN KEY (customer_zip_code_prefix) REFERENCES geolocation(geolocation_zip_code_prefix)
+
+    INDEX idx_customers_zip (customer_zip_code_prefix)
 );
+
+
+-- ============================================
+-- 3. SELLERS
+-- ============================================
 
 CREATE TABLE sellers (
     seller_id VARCHAR(32) PRIMARY KEY,
     seller_zip_code_prefix INT,
     seller_city VARCHAR(100),
     seller_state CHAR(2),
-    FOREIGN KEY (seller_zip_code_prefix) REFERENCES geolocation(geolocation_zip_code_prefix)
+
+    INDEX idx_sellers_zip (seller_zip_code_prefix)
 );
+
+
+-- ============================================
+-- 4. PRODUCTS
+-- ============================================
 
 CREATE TABLE products (
     product_id VARCHAR(32) PRIMARY KEY,
@@ -35,6 +64,11 @@ CREATE TABLE products (
     product_width_cm INT
 );
 
+
+-- ============================================
+-- 5. ORDERS
+-- ============================================
+
 CREATE TABLE orders (
     order_id VARCHAR(32) PRIMARY KEY,
     customer_id VARCHAR(32) NOT NULL,
@@ -44,32 +78,61 @@ CREATE TABLE orders (
     order_delivered_carrier_date DATETIME,
     order_delivered_customer_date DATETIME,
     order_estimated_delivery_date DATETIME,
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+
+    INDEX idx_orders_customer (customer_id),
+
+    FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id)
 );
 
+
+-- ============================================
+-- 6. ORDER ITEMS
+-- ============================================
+
 CREATE TABLE order_items (
-    order_id VARCHAR(32),
-    order_item_id INT,
-    product_id VARCHAR(32),
-    seller_id VARCHAR(32),
+    order_id VARCHAR(32) NOT NULL,
+    order_item_id INT NOT NULL,
+    product_id VARCHAR(32) NOT NULL,
+    seller_id VARCHAR(32) NOT NULL,
     shipping_limit_date DATETIME,
     price DECIMAL(10,2),
     freight_value DECIMAL(10,2),
+
     PRIMARY KEY (order_id, order_item_id),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (seller_id) REFERENCES sellers(seller_id)
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id),
+
+    FOREIGN KEY (product_id)
+        REFERENCES products(product_id),
+
+    FOREIGN KEY (seller_id)
+        REFERENCES sellers(seller_id)
 );
 
+
+-- ============================================
+-- 7. ORDER PAYMENTS
+-- ============================================
+
 CREATE TABLE order_payments (
-    order_id VARCHAR(32),
-    payment_sequential INT,
+    order_id VARCHAR(32) NOT NULL,
+    payment_sequential INT NOT NULL,
     payment_type VARCHAR(20),
     payment_installments INT,
     payment_value DECIMAL(10,2),
+
     PRIMARY KEY (order_id, payment_sequential),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
 );
+
+
+-- ============================================
+-- 8. ORDER REVIEWS
+-- ============================================
 
 CREATE TABLE order_reviews (
     review_id VARCHAR(32) PRIMARY KEY,
@@ -79,8 +142,17 @@ CREATE TABLE order_reviews (
     review_comment_message TEXT,
     review_creation_date DATETIME,
     review_answer_timestamp DATETIME,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+
+    INDEX idx_reviews_order (order_id),
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
 );
+
+
+-- ============================================
+-- 9. CATEGORY TRANSLATION
+-- ============================================
 
 CREATE TABLE category_translation (
     product_category_name VARCHAR(100) PRIMARY KEY,

@@ -160,3 +160,45 @@ WHERE  o.order_id IS NULL
     OR s.seller_id IS NULL
     OR p.product_id IS NULL;
 
+-- Products
+
+SELECT * FROM products;
+
+-- Checking For Missing Values
+
+SELECT
+    SUM(product_id IS NULL) as Missing_id,
+    SUM(product_category_name IS NULL) as Missing_Name,
+    SUM(product_description_length IS NULL) as Missing_length,
+    SUM(product_photos_qty IS NULL) AS Missing_photo,
+    SUM(product_weight_g IS NULL) AS Missing_weight,
+    SUM(product_width_cm IS NULL) AS Missing_width,
+    SUM(product_length_cm IS NULL) AS Missing_length_cm
+FROM products;
+
+-- Checking For Invalid Values
+
+SELECT
+    SUM(product_description_length < 0) as Invalid_length,
+    SUM(product_weight_g < 0) AS Invalid_weight,
+    SUM(product_width_cm < 0) AS Invalid_width,
+    SUM(product_description_length < 0) AS Invalid_description_length,
+    SUM(product_name_length < 0) AS Invalid_name_length,
+    SUM(product_photos_qty < 0) AS Invalid_photos_qty,
+    SUM(product_length_cm < 0) AS Invalid_length_cm
+FROM products;
+
+-- Checking For Duplicates
+
+SELECT product_id , count(*) as N
+FROM products
+GROUP BY product_id
+HAVING count(*) > 1;
+
+-- Checking For Product That Didn't got ordered
+
+SELECT p.product_id
+FROM products p
+LEFT JOIN order_items oi
+ON p.product_id = oi.product_id
+WHERE oi.product_id IS NULL;

@@ -202,3 +202,30 @@ FROM products p
 LEFT JOIN order_items oi
 ON p.product_id = oi.product_id
 WHERE oi.product_id IS NULL;
+
+-- Sellers
+SELECT * FROM sellers;
+
+-- Checking for Missing Values 
+
+SELECT 
+SUM(seller_id IS NULL) as Missing_id,
+SUM(seller_zip_code_prefix IS NULL) AS Missing_seller_zip,
+SUM(seller_city IS NULL) as Missing_city,
+SUM(seller_state IS NULL) as missing_state
+FROM sellers;
+
+-- Checking For Duplicates
+
+SELECT seller_id , count(*) as Duplicates
+FROM sellers
+GROUP BY seller_id
+HAVING count(*) > 1;
+
+-- Checking For Invalid Relationships
+
+SELECT s.seller_id
+FROM sellers s
+LEFT JOIN order_items oi
+ON s.seller_id = oi.seller_id
+WHERE oi.seller_id IS NULL;

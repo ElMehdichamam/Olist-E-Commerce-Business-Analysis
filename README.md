@@ -55,6 +55,7 @@ GROUP BY order_status;
 
 ### Issue
 Some Customer Unique ID is Duplicated .
+
 ## Explantation
 Duplicated Customer unique id doesn't mean Bad data If we check 
 
@@ -66,4 +67,6 @@ Duplicated Customer unique id doesn't mean Bad data If we check
     ```
 we will found out two customer have the same unique id but different customer_id that because customer_id is realted to orders not customer itself and that logically cause one cusotmer might have multiple order
 
+## OBSERVATION 
 
+I Found The Same Thing With order_item table there we have multiple orders has the same order_item_id and different order_id so we can say One Item has the same id can get many orders So We can say that duplications Can Makes Sense

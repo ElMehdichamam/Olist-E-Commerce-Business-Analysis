@@ -372,3 +372,12 @@ SELECT *
 FROM geolocation
 WHERE geolocation_lng NOT BETWEEN -180 AND 180;
 
+-- category translation
+
+SELECT * FROM category_translation;
+
+-- Checking For Missing Values
+SELECT
+SUM(product_category_name IS NULL OR TRIM(product_category_name) ='') AS Missing_Name,
+SUM(product_category_name_english IS NULL OR TRIM(product_category_name_english) = '') AS Missing_English_Name
+FROM category_translation; 

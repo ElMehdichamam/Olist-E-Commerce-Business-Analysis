@@ -144,7 +144,7 @@ HAVING count(*) > 1;
 
 -- Checking for Invalid Relationships
 
-SELECT oi.order_item_id
+SELECT oi.order_id
 FROM order_items oi
 
 LEFT JOIN orders o 
@@ -156,10 +156,24 @@ ON oi.seller_id = s.seller_id
 LEFT JOIN products p
 ON oi.product_id = p.product_id
 
+LEFT JOIN order_payments op
+ON oi.order_id = op.order_id
+
+LEFT JOIN order_reviews ore
+ON oi.order_id = ore.order_id
+
 WHERE  o.order_id IS NULL
     OR s.seller_id IS NULL
-    OR p.product_id IS NULL;
+    OR p.product_id IS NULL
+    OR op.order_id IS NULL
+    OR ore.order_id IS NULL;
 
+
+-- Checking the duplicated Id to understanding why it got duplicated
+
+SELECT *
+FROM order_items
+WHERE order_id = "00143d0f86d6fbd9f9b38ab440ac16f5";
 -- Products
 
 SELECT * FROM products;
@@ -229,3 +243,47 @@ FROM sellers s
 LEFT JOIN order_items oi
 ON s.seller_id = oi.seller_id
 WHERE oi.seller_id IS NULL;
+
+-- Order Payment
+
+SELECT * FROM order_payments;
+
+-- Checking For Missing Values
+
+SELECT 
+SUM(order_id IS NULL) AS Missing_id,
+SUM(payment_sequential IS NULL) AS Missing_Sequential,
+SUM(payment_type IS NULL) AS Missing_Payment_Type,
+SUM(payment_installments IS NULL) AS Missing_payment_installments,
+SUM(payment_value IS NULL) AS Missing_payment_value
+FROM order_payments;
+
+-- Checking For Invalid Values
+
+SELECT 
+SUM(payment_sequential < 0) AS Invalid_payment_sequential,
+SUM(payment_installments < 0) AS Invalid_payment_installments,
+SUM(payment_value < 0) as Invalid_payment_value
+FROM order_payments;
+
+-- Checking For Duplicates
+
+SELECT order_id , count(*) AS N
+FROM order_payments
+GROUP BY order_id
+HAVING count(*) > 1;
+
+-- Looking for the duplicated ID to explore the reason why it's duplicated
+
+SELECT *
+FROM order_payments
+WHERE order_id = "0016dfedd97fc2950e388d2971d718c7";
+
+-- Checking For Invalid Relationships
+
+SELECT op.order_id
+FROM order_payments op
+
+LEFT JOIN orders o 
+ON o.order_id = op.order_id
+WHERE o.order_id IS NULL;

@@ -124,7 +124,7 @@ WHERE freight_value < 0;
 SELECT order_id, shipping_limit_date
 FROM order_items
 where STR_TO_DATE(shipping_limit_date,'%Y-%m-%d %H:%i:%s') IS NULL
-AND shipping_limit_date IS NULL;
+AND shipping_limit_date IS NOT NULL;
 
 SELECT oi.shipping_limit_date
 FROM order_items oi
@@ -134,15 +134,10 @@ WHERE oi.shipping_limit_date < o.order_purchase_timestamp;
 
 -- Checking For Duplications
 
-SELECT order_id, count(*) as N
+SELECT order_id , order_item_id, COUNT(*) AS N
 FROM order_items
-GROUP BY order_id
-HAVING count(*) > 1;
-
-SELECT order_item_id, count(*) as N
-FROM order_items
-GROUP BY order_item_id
-HAVING count(*) > 1;
+GROUP BY order_id , order_item_id
+HAVING COUNT(*) > 1;
 
 -- Checking for Invalid Relationships
 
@@ -161,14 +156,10 @@ ON oi.product_id = p.product_id
 LEFT JOIN order_payments op
 ON oi.order_id = op.order_id
 
-LEFT JOIN order_reviews ore
-ON oi.order_id = ore.order_id
-
 WHERE  o.order_id IS NULL
     OR s.seller_id IS NULL
     OR p.product_id IS NULL
-    OR op.order_id IS NULL
-    OR ore.order_id IS NULL;
+    OR op.order_id IS NULL;
 
 
 -- Checking the duplicated Id to understanding why it got duplicated
@@ -315,7 +306,7 @@ FROM order_payments;
 
 -- Checking For Duplicates
 
-SELECT order_id , count(*) AS N
+SELECT order_id,payment_sequential , count(*) AS N
 FROM order_payments
 GROUP BY order_id
 HAVING count(*) > 1;

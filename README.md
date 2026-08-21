@@ -70,3 +70,31 @@ we will found out two customer have the same unique id but different customer_id
 ## OBSERVATION 
 
 I Found The Same Thing With order_item table there we have multiple orders has the same order_item_id and different order_id so we can say One Item has the same id can get many orders So We can say that duplications Can Makes Sense
+
+## ISSUE 
+SOME Order_id Is Duplicated 
+
+## Explantation
+
+By checking With 
+```
+SELECT *
+FROM order_payments
+WHERE order_id = "0016dfedd97fc2950e388d2971d718c7";
+
+``` 
+
+I Found Out That Order Id got duplicated if an order got order more than once and with diffrent payment Method 
+
+## OBSERVATION
+I rechecked The Quality Between Relation In the order_items Table
+And I notice That Product_id and seller_id and shipping_limit_date and order_id is duplicated
+But that doesn't concern the order_item_id that id belongs to the item id itself with this query
+```
+
+SELECT *
+FROM order_items
+WHERE order_id = "00143d0f86d6fbd9f9b38ab440ac16f5";
+
+```
+we can find out that there are three diffrent ID's that mean Three diffrent product And They counted as One Order that explain Why we have duplicated id's 

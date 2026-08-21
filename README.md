@@ -98,3 +98,41 @@ WHERE order_id = "00143d0f86d6fbd9f9b38ab440ac16f5";
 
 ```
 we can find out that there are three diffrent ID's that mean Three diffrent product And They counted as One Order that explain Why we have duplicated id's 
+
+
+## Finding:
+    Some products have missing product names.
+## Investigation: 
+    Checked whether missing names were associated with order status; no clear relationship was identified.
+## Conclusion:
+     The cause cannot be determined from the available dataset.
+## Treatment:
+     Keep the records and handle missing product names appropriately during analysis.
+
+## Current Solution
+    Calculting How Much this Missinng Data would affect on My Analysis By This Query we found that the affected data 
+    Represent 1.42% of the dataset
+    ```
+    SELECT COUNT(*) AS affected_order_items
+    FROM order_items oi
+    JOIN products p
+        ON oi.product_id = p.product_id
+    WHERE p.product_category_name IS NULL
+       OR TRIM(p.product_category_name) = '';
+       
+    ```
+    And We calculted the Revenue of the missing data and Comapare it with the totale revenue it represent 1.32%
+    ```
+        SELECT
+            SUM(oi.price) AS affected_revenue
+        FROM order_items oi
+        JOIN products p
+            ON oi.product_id = p.product_id
+        WHERE p.product_category_name IS NULL
+           OR TRIM(p.product_category_name) = '';
+
+        SELECT
+        SUM(price) AS total_revenue
+        FROM order_items;
+
+    ```

@@ -1,10 +1,12 @@
 -- orders
 
+SELECT * FROM orders;
+
 -- Checking For Missing Values
 SELECT 
-       SUM(order_id IS NULL) as Missing_id,
-       SUM(customer_id IS NULL) as Missing_customer_id,
-       SUM(order_status IS NULL) as Missing_status
+       SUM(order_id IS NULL OR TRIM(order_id) ='') as Missing_id,
+       SUM(customer_id IS NULL OR TRIM(customer_id) ='') as Missing_customer_id,
+       SUM(order_status IS NULL OR TRIM(order_status) ='') as Missing_status
 FROM orders;
 
 -- Checking For Duplicates
@@ -59,11 +61,11 @@ SELECT * FROM customers;
 -- Checking For Missing Values
 
 SELECT
-    SUM(customer_id IS NULL) as Missing_id,
-    SUM(customer_unique_id IS NULL) as missing_unique_id,
+    SUM(customer_id IS NULL OR TRIM(customer_id) ='') as Missing_id,
+    SUM(customer_unique_id IS NULL OR TRIM(customer_unique_id) ='') as missing_unique_id,
     SUM(customer_zip_code_prefix IS NULL) as missing_zip_code,
-    SUM(customer_city IS NULL) as missing_city,
-    SUM(customer_state IS NULL) as missing_state
+    SUM(customer_city IS NULL OR TRIM(customer_city) ='') as missing_city,
+    SUM(customer_state IS NULL OR TRIM(customer_state) ='') as missing_state
 FROM customers;
 
 -- Checking for duplicates
@@ -101,8 +103,8 @@ SELECT * FROM order_items;
 -- checking for missing values
 
 SELECT
-    SUM(order_id IS NULL) AS Missing_id,
-    SUM(order_item_id IS NULL) AS missing_item_id,
+    SUM(order_id IS NULL OR TRIM(order_id) ='') AS Missing_id,
+    SUM(order_item_id IS NULL OR TRIM(order_item_id) ='') AS missing_item_id,
     SUM(price is NULL) AS missing_price,
     SUM(freight_value IS NULL) AS missing_freight_value
 FROM order_items;
@@ -181,14 +183,58 @@ SELECT * FROM products;
 -- Checking For Missing Values
 
 SELECT
-    SUM(product_id IS NULL) as Missing_id,
-    SUM(product_category_name IS NULL) as Missing_Name,
+    SUM(product_id IS NULL OR TRIM(product_id) ='') as Missing_id,
+    SUM(product_category_name IS NULL OR TRIM(product_category_name) ='') as Missing_Name,
     SUM(product_description_length IS NULL) as Missing_length,
     SUM(product_photos_qty IS NULL) AS Missing_photo,
     SUM(product_weight_g IS NULL) AS Missing_weight,
     SUM(product_width_cm IS NULL) AS Missing_width,
     SUM(product_length_cm IS NULL) AS Missing_length_cm
 FROM products;
+
+-- Checking the Missing Values To explore The reason why
+SELECT *
+FROM products
+WHERE 
+      product_category_name IS NULL 
+      OR TRIM(product_category_name) ='';
+
+SELECT
+    p.product_id,
+    COUNT(oi.order_id) AS order_count
+FROM products p
+LEFT JOIN order_items oi
+    ON p.product_id = oi.product_id
+WHERE p.product_category_name IS NULL
+   OR TRIM(p.product_category_name) = ''
+GROUP BY p.product_id;
+
+-- How Much Does this missing data affect My analysis
+
+SELECT COUNT(*) AS affected_order_items
+FROM order_items oi
+JOIN products p
+    ON oi.product_id = p.product_id
+WHERE p.product_category_name IS NULL
+   OR TRIM(p.product_category_name) = '';
+
+-- Compare with total
+SELECT COUNT(*) AS total_order_items
+FROM order_items;
+-- Calculate the affected Revenue
+SELECT
+    SUM(oi.price) AS affected_revenue
+FROM order_items oi
+JOIN products p
+    ON oi.product_id = p.product_id
+WHERE p.product_category_name IS NULL
+   OR TRIM(p.product_category_name) = '';
+
+-- Compare it with Total Revenue
+
+SELECT
+SUM(price) AS total_revenue
+FROM order_items;
 
 -- Checking For Invalid Values
 
@@ -217,16 +263,17 @@ LEFT JOIN order_items oi
 ON p.product_id = oi.product_id
 WHERE oi.product_id IS NULL;
 
+
 -- Sellers
 SELECT * FROM sellers;
 
 -- Checking for Missing Values 
 
 SELECT 
-SUM(seller_id IS NULL) as Missing_id,
+SUM(seller_id IS NULL OR TRIM(seller_id) ='') as Missing_id,
 SUM(seller_zip_code_prefix IS NULL) AS Missing_seller_zip,
-SUM(seller_city IS NULL) as Missing_city,
-SUM(seller_state IS NULL) as missing_state
+SUM(seller_city IS NULL OR TRIM(seller_city) ='') as Missing_city,
+SUM(seller_state IS NULL OR TRIM(seller_state) ='') as missing_state
 FROM sellers;
 
 -- Checking For Duplicates
@@ -251,9 +298,9 @@ SELECT * FROM order_payments;
 -- Checking For Missing Values
 
 SELECT 
-SUM(order_id IS NULL) AS Missing_id,
+SUM(order_id IS NULL OR TRIM(order_id) ='') AS Missing_id,
 SUM(payment_sequential IS NULL) AS Missing_Sequential,
-SUM(payment_type IS NULL) AS Missing_Payment_Type,
+SUM(payment_type IS NULL OR TRIM(payment_type) ='') AS Missing_Payment_Type,
 SUM(payment_installments IS NULL) AS Missing_payment_installments,
 SUM(payment_value IS NULL) AS Missing_payment_value
 FROM order_payments;
@@ -287,3 +334,17 @@ FROM order_payments op
 LEFT JOIN orders o 
 ON o.order_id = op.order_id
 WHERE o.order_id IS NULL;
+
+-- Order Review
+
+SELECT * FROM order_reviews;
+
+-- Checking For Missing Value
+
+SELECT
+SUM(review_id IS NULL OR TRIM(review_id) ='') AS Missing_review,
+SUM(order_id IS NULL OR TRIM(order_id) ='') AS Missing_order,
+SUM(review_score IS NULL) AS Missing_Score,
+SUM(review_comment_title IS NULL OR TRIM(review_comment_title) = '') AS Missing_Title,
+SUM(review_comment_message IS NULL OR TRIM(review_comment_message) = '') AS Missing_Message
+FROM order_reviews;

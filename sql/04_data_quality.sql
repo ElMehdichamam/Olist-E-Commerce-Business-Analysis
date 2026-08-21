@@ -348,3 +348,27 @@ SUM(review_score IS NULL) AS Missing_Score,
 SUM(review_comment_title IS NULL OR TRIM(review_comment_title) = '') AS Missing_Title,
 SUM(review_comment_message IS NULL OR TRIM(review_comment_message) = '') AS Missing_Message
 FROM order_reviews;
+
+-- GEOLOCATION 
+SELECT * FROM geolocation;
+
+-- Checking For Missing Values
+
+SELECT 
+SUM(geolocation_id IS NULL) AS Missing_Id,
+SUM(geolocation_zip_code_prefix IS NULL) AS Missing_geolocation_zip,
+SUM(geolocation_lat IS NULL) AS Missing_geolocation_lat,
+SUM(geolocation_lng IS NULL) AS Missing_geolocation_lng,
+SUM(geolocation_city IS NULL OR TRIM(geolocation_city) = '') AS Missing_geolocation_city,
+SUM(geolocation_state IS NULL OR TRIM(geolocation_state) ='') AS Missing_geolocation_state
+FROM geolocation;
+
+-- Checking For Invalid Values
+SELECT *
+FROM geolocation
+WHERE geolocation_lat NOT BETWEEN -90 AND 90;
+
+SELECT *
+FROM geolocation
+WHERE geolocation_lng NOT BETWEEN -180 AND 180;
+

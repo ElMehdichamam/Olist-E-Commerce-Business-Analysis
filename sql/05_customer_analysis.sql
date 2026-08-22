@@ -19,20 +19,20 @@ FROM customers;
 
 SELECT COUNT(DISTINCT c.customer_unique_id) AS Active_Customer
 FROM customers c
-LEFT JOIN orders o 
+JOIN orders o 
 ON c.customer_id = o.customer_id;
 
 -- 3
 
 SELECT 
-    customer_id,
+    customer_unique_id,
     number_of_orders,
     CASE
         WHEN number_of_orders = 1 THEN "One-time"
         ELSE "Repeat"
     END AS customer_type
 FROM (
-    SELECT c.customer_id , COUNT(DISTINCT o.order_id) AS number_of_orders
+    SELECT c.customer_unique_id , COUNT(DISTINCT o.order_id) AS number_of_orders
     FROM customers c
     LEFT JOIN orders o 
     ON c.customer_id = o.customer_id
@@ -68,11 +68,15 @@ GROUP BY c.customer_id;
 -- 6
 
 SELECT c.customer_id,
-    COUNT(o.order_id) AS Average_orders 
+    COALESCE(SUM(oi.price + oi.freight_value),0)/
+    NULLIF(COUNT(DISTINCT o.order_id),0) AS Average_order_value 
 FROM customers c
 LEFT JOIN orders o
 ON c.customer_id = o.customer_id
-GROUP BY c.customer_id;
+LEFT JOIN order_items oi
+ON o.order_id = oi.order_id
+GROUP BY c.customer_unique_id
+ORDER BY Average_orders DESC;
 
 
 -- 7 TOP customer BY Revenue
@@ -86,7 +90,7 @@ ON c.customer_id = o.customer_id
 LEFT JOIN order_items oi
 ON o.order_id = oi.order_id
 GROUP BY c.customer_id
-ORDER BY "Top_revenue" DESC
+ORDER BY Top_revenue DESC
 LIMIT 1;
 
 -- 8 Distribution By City And State
